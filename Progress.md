@@ -9,15 +9,15 @@
 - [x] Decision Logic Implementation
 - [x] Implement rule-based load classification
 - [x] Completed Work
-- [x] Frontend is done.
-- [ ] Backend is going on..
+- [x] Frontend is done
 - [x] We will test system using simulated input values
 - [x] Display status dynamically on UI
 
 **Checkpoint 3: Feature integration & refinement (09:00 PM)**
 Smart Suggestions:
 - [ ] Normal → “Within Thresholds”
-- [ ] High → “Exceeds thresholds”
+- [ ] High → “Exceeds thresholds” (overload)
+- [ ] backend is done
 - [ ] Add color indicators (Green / Yellow / Red)
 - [ ] Improve UI responsiveness
 
