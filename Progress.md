@@ -18,6 +18,16 @@
 
 *Tasks completed:* Integrated a basic login page to simulate user authentication and control access to the main system. Enhanced the UI with improved color indicators and alert messages for better visualization of load status.
 
+## Checkpoint 4 – Mid Process Review (11:00 PM)
+
+*Tasks completed:* Refined the core system flow and completed integration of the frontend with the load-processing logic.
+
+*Current progress:* The application is now handling user input more smoothly and displaying status updates with better clarity.
+The main processing pipeline is functioning, and the interface is becoming more interactive and user-friendly.
+
+*Next steps:* Add more real-time feedback for better user experience.
+Test the system across multiple scenarios to ensure stability and accuracy.
+
 # Progress Tracking - TEAM EXPEDITION
 
 **Checkpoint 1: Initial setup & idea validation (03:00 PM)**
@@ -42,6 +52,6 @@ Smart Suggestions:
 - [x] Improve UI responsiveness
 
 **Checkpoint 4: Mid-progress review (11:00 PM)**
-- [ ] Ensure correct mapping of input to output
-- [ ] Optimize logic flow
-- [ ] Enhance UI design and readability
+- [x] Ensure correct mapping of input to output
+- [x] Optimize logic flow and real time feedback
+- [x] Enhance UI design and readability
