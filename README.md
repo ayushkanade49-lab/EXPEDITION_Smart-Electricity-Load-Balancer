@@ -1,9 +1,9 @@
 # EXPEDITION_Smart-Electricity-Load-Balancer
 
-PROBLEM STATEMENT:
+## PROBLEM STATEMENT:
 Electricity distribution systems often face issues such as overload, inefficient energy usage, and unexpected power outages due to uneven load distribution. This becomes more critical in smart homes and modern grids where multiple devices and energy sources operate simultaneously.
 
-DESCRIPTION:
+## DESCRIPTION:
 What to build:
 A smart electricity load balancing system that can monitor, analyze, and automatically distribute electrical load across different sources and consumers in real time, ensuring stability and efficiency.
 Implementation approach:
@@ -13,5 +13,5 @@ The system includes a load monitoring module that tracks electricity usage, a da
 E2E implementation scope:
 The complete flow begins with capturing real-time load data, followed by processing and identifying imbalances or overloads. The system then automatically adjusts the load distribution or shifts it to alternative sources, ensures continuous power supply, and updates the user through notifications or dashboards.
 
-BENEFITS:
+## BENEFITS:
 This solution enhances energy efficiency, reduces the risk of power failures, and promotes sustainable energy usage by integrating renewable sources. It provides hands-on experience with IoT, smart grids, and automation, making it highly relevant for real-world applications in modern energy systems and smart infrastructure.
