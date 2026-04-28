@@ -6,7 +6,7 @@
 - [X] Established workflow: Input → Process → Output
 
 **Checkpoint 2: Core development progress (05:00 PM)**
-- [] Decision Logic Implementation
-- [] Implement rule-based load classification
-- [] We will test system using simulated input values
-- [] Display status dynamically on UI
+- [ ] Decision Logic Implementation
+- [ ] Implement rule-based load classification
+- [ ] We will test system using simulated input values
+- [ ] Display status dynamically on UI
