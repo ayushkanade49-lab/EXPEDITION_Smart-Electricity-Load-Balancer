@@ -1,7 +1,7 @@
 ## Current Status (Day 1 - 03:00 PM)
 
-Tasks completed: Project idea finalized and problem statement defined. Basic system architecture and logic formulation for load balancing completed. Team roles assigned and project structure initialized.
-Current progress: Structuring core project files (index.html, style.css, script.js) and designing the basic UI for load input and result display. Preparing simulated input values for testing load scenarios.
+**Tasks completed: Project idea finalized and problem statement defined. Basic system architecture and logic formulation for load balancing completed. Team roles assigned and project structure initialized.**
+**Current progress: Structuring core project files (index.html, style.css, script.js) and designing the basic UI for load input and result display. Preparing simulated input values for testing load scenarios.**
 Next steps: Begin implementing the decision logic .
 
 ## Current Status (Day 1 - 05:00 PM)
