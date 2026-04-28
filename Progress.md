@@ -12,7 +12,7 @@
 - [ ] Display status dynamically on UI
 
 **Checkpoint 3: Feature integration & refinement (09:00 PM)**
-## Smart Suggestions:
+Smart Suggestions:
 - [ ] Normal → “Within Thresholds”
 - [ ] High → “Exceeds thresholds”
 - [ ] Add color indicators (Green / Yellow / Red)
