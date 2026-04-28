@@ -18,7 +18,7 @@
 
 *Tasks completed:* Integrated a basic login page to simulate user authentication and control access to the main system. Enhanced the UI with improved color indicators and alert messages for better visualization of load status.
 
-## Checkpoint 4 – Mid Process Review (11:00 PM)
+## Checkpoint 4 – Mid Process Review (11:30 PM)
 
 *Tasks completed:* Refined the core system flow and completed integration of the frontend with the load-processing logic.
 
