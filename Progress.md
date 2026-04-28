@@ -8,6 +8,9 @@
 **Checkpoint 2: Core development progress (05:00 PM)**
 - [ ] Decision Logic Implementation
 - [ ] Implement rule-based load classification
+- [ ] Completed Work
+ *Frontend is done.
+ *Backend is going on..
 - [ ] We will test system using simulated input values
 - [ ] Display status dynamically on UI
 
