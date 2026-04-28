@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PowerGrid AI Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1220;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-box {
+      background: #111a2e;
+      padding: 30px;
+      border-radius: 12px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      color: #4da6ff;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #4da6ff, #7a5cff);
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .error {
+      color: #ff4d4d;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-box">
+  <h2>⚡ PowerGrid AI</h2>
+  <p>Login (Electrician / Manager)</p>
+
+  <input type="email" id="email" placeholder="Enter Email" required>
+  <input type="password" id="password" placeholder="Enter Password" required>
+
+  <button onclick="login()">Login</button>
+
+  <div id="errorMsg" class="error"></div>
+</div>
+
+<script>
+  // Predefined users (DEMO ONLY)
+  const users = [
+    { email: "rajan@gmail.com", password: "pass123" },
+    { email: "kumar@gmail.com", password: "pass123" },
+    { email: "suresh@gmail.com", password: "pass123" },
+    { email: "mohan@gmail.com", password: "pass123" },
+    { email: "vikram@gmail.com", password: "pass123" },
+    { email: "prasad@gmail.com", password: "pass123" },
+    { email: "naveen@gmail.com", password: "pass123" },
+    { email: "deepak@gmail.com", password: "pass123" },
+    { email: "arun@gmail.com", password: "pass123" },
+    { email: "manager@gmail.com", password: "admin123" }
+  ];
+
+  function login() {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const errorMsg = document.getElementById("errorMsg");
+
+    // Check user
+    const validUser = users.find(user => 
+      user.email === email && user.password === password
+    );
+
+    if (validUser) {
+      errorMsg.style.color = "lightgreen";
+      errorMsg.innerText = "Login successful! Redirecting...";
+
+      // Redirect after 1 second
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1000);
+
+    } else {
+      errorMsg.style.color = "#ff4d4d";
+      errorMsg.innerText = "Invalid email or password / Not in list";
+    }
+  }
+</script>
+
+</body>
+</html>
