@@ -10,3 +10,15 @@
 - [ ] Implement rule-based load classification
 - [ ] We will test system using simulated input values
 - [ ] Display status dynamically on UI
+
+**Checkpoint 3: Feature integration & refinement (09:00 PM)**
+## Smart Suggestions:
+- [ ] Normal → “Within Thresholds”
+- [ ] High → “Exceeds thresholds”
+- [ ] Add color indicators (Green / Yellow / Red)
+- [ ] Improve UI responsiveness
+
+**Checkpoint 4: Mid-progress review (11:00 PM)**
+- [ ] Ensure correct mapping of input to output
+- [ ] Optimize logic flow
+- [ ] Enhance UI design and readability
