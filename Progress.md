@@ -1,14 +1,22 @@
 ## Current Status (Day 1 - 03:00 PM)
 
 *Tasks completed:* Project idea finalized and problem statement defined. Basic system architecture and logic formulation for load balancing completed. Team roles assigned and project structure initialized.
+
 *Current progress:* Structuring core project files (index.html, style.css, script.js) and designing the basic UI for load input and result display. Preparing simulated input values for testing load scenarios.
+
 *Next steps:* Begin implementing the decision logic .
 
 ## Current Status (Day 1 - 05:00 PM)
 
 *Tasks completed:* Developed the core rule-based processing pipeline connecting user input to dynamic output. Implemented load classification logic and integrated it with the frontend UI. Established interaction between input field and result display using JavaScript.
+
 *Current progress:* The frontend system is successfully accepting load values and displaying corresponding status (Normal / High ). UI enhancements (color indicators and alert messages) are being added for better visualization.
+
 *Next steps:* Integrate smart suggestions for load balancing (e.g., reduce usage, turn off heavy appliances) and refine UI with real-time feedback for Checkpoint 3.
+
+## Additional Progress (Checkpoint 3 - 08:30 PM)
+
+*Tasks completed:* Integrated a basic login page to simulate user authentication and control access to the main system. Enhanced the UI with improved color indicators and alert messages for better visualization of load status.
 
 # Progress Tracking - TEAM EXPEDITION
 
@@ -25,13 +33,13 @@
 - [x] We will test system using simulated input values
 - [x] Display status dynamically on UI
 
-**Checkpoint 3: Feature integration & refinement (09:00 PM)**
+**Checkpoint 3: Feature integration & refinement (08:30 PM)**
 Smart Suggestions:
-- [ ] Normal → “Within Thresholds”
-- [ ] High → “Exceeds thresholds” (overload)
-- [ ] backend is done
-- [ ] Add color indicators (Green / Yellow / Red)
-- [ ] Improve UI responsiveness
+- [x] Normal → “Within Thresholds”
+- [x] High → “Exceeds thresholds” (overload)
+- [x] backend is done
+- [x] login page done
+- [x] Improve UI responsiveness
 
 **Checkpoint 4: Mid-progress review (11:00 PM)**
 - [ ] Ensure correct mapping of input to output
