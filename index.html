@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Electricity Load Balancer Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #111827;
+      --bg-card: rgba(255,255,255,0.04);
+      --bg-card-hover: rgba(255,255,255,0.08);
+      --border-color: rgba(255,255,255,0.08);
+      --text-primary: #f0f4ff;
+      --text-secondary: #8b9ac7;
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-orange: #f59e0b;
+      --glow-blue: 0 0 20px rgba(59,130,246,0.4);
+      --glow-red: 0 0 25px rgba(239,68,68,0.5);
+      --glow-green: 0 0 20px rgba(16,185,129,0.4);
+      --shadow-card: 0 8px 32px rgba(0,0,0,0.4);
+      --gradient-main: linear-gradient(135deg, #0a0e1a 0%, #111827 50%, #0f172a 100%);
+    }
+    [data-theme="light"] {
+      --bg-primary: #f0f4ff;
+      --bg-secondary: #e8edf8;
+      --bg-card: rgba(255,255,255,0.7);
+      --bg-card-hover: rgba(255,255,255,0.95);
+      --border-color: rgba(59,130,246,0.15);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --accent-blue: #2563eb;
+      --accent-cyan: #0891b2;
+      --accent-purple: #7c3aed;
+      --accent-green: #059669;
+      --accent-red: #dc2626;
+      --accent-orange: #d97706;
+      --glow-blue: 0 0 20px rgba(37,99,235,0.25);
+      --glow-red: 0 0 25px rgba(220,38,38,0.3);
+      --glow-green: 0 0 20px rgba(5,150,105,0.3);
+      --shadow-card: 0 8px 32px rgba(37,99,235,0.1);
+      --gradient-main: linear-gradient(135deg, #e8edf8 0%, #f0f4ff 50%, #dde5f7 100%);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--gradient-main);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.5s ease, color 0.3s ease;
+    }
+
+    /* Animated background particles */
+    #particles-bg {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      animation: floatUp linear infinite;
+      opacity: 0;
+    }
+    @keyframes floatUp {
+      0% { opacity: 0; transform: translateY(100vh) scale(0); }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.2; }
+      100% { opacity: 0; transform: translateY(-10vh) scale(1); }
+    }
+
+    /* Grid lines background */
+    body::before {
+      content: '';
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+      background-size: 50px 50px;
+      z-index: 0;
+      pointer-events: none;
+    }
+    [data-theme="light"] body::before {
+      background-image:
+        linear-gradient(rgba(37,99,235,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37,99,235,0.06) 1px, transparent 1px);
+    }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+
+    /* ===== HEADER ===== */
+    header {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(20px);
+      background: var(--bg-card);
+      position: sticky; top: 0; z-index: 100;
+      animation: slideDown 0.6s ease;
+    }
+    @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .header-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: white;
+      box-shadow: var(--glow-blue);
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: var(--glow-blue); }
+      50% { box-shadow: 0 0 30px rgba(59,130,246,0.7); }
+    }
+    .logo-text h1 {
+      font-size: 1.2rem; font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .logo-text p { font-size: 0.72rem; color: var(--text-secondary); }
+
+    .header-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+    #liveClock {
+      font-size: 0.95rem; font-weight: 600; color: var(--accent-cyan);
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      padding: 6px 14px; border-radius: 20px; letter-spacing: 1px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .status-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--bg-card); border: 1px solid rgba(16,185,129,0.3);
+      padding: 6px 14px; border-radius: 20px;
+      font-size: 0.78rem; color: var(--accent-green);
+    }
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent-green);
+      animation: blink 1.5s ease-in-out infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .theme-btn {
+      width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border-color);
+      background: var(--bg-card); color: var(--text-primary);
+      cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s ease; backdrop-filter: blur(10px);
+    }
+    .theme-btn:hover { background: var(--accent-blue); color: white; transform: rotate(20deg); box-shadow: var(--glow-blue); }
+
+    /* ===== MAIN LAYOUT ===== */
+    main { padding: 30px 0 60px; }
+
+    /* Stat cards row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px; margin-bottom: 28px;
+      animation: fadeInUp 0.7s ease 0.2s both;
+    }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-card);
+      position: relative; overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+      cursor: default;
+    }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--card-accent, var(--accent-blue)), transparent);
+    }
+    .stat-card:hover { transform: translateY(-4px); background: var(--bg-card-hover); box-shadow: var(--shadow-card), var(--glow-blue); }
+
+    .stat-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; margin-bottom: 12px;
+    }
+    .stat-value {
+      font-size: 1.9rem; font-weight: 800; line-height: 1;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent-blue));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-label { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-change { font-size: 0.72rem; margin-top: 8px; }
+    .stat-change.up { color: var(--accent-green); }
+    .stat-change.down { color: var(--accent-red); }
+
+    /* ===== MAIN GRID ===== */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 22px;
+      animation: fadeInUp 0.7s ease 0.4s both;
+    }
+    @media (max-width: 1000px) { .main-grid { grid-template-columns: 1fr; } }
+
+    /* ===== CARD ===== */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover { box-shadow: var(--shadow-card), 0 0 0 1px rgba(59,130,246,0.15); }
+    .card-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .card-header-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center; font-size: 15px;
+    }
+    .card-header h2 { font-size: 1rem; font-weight: 700; }
+    .card-header p { font-size: 0.72rem; color: var(--text-secondary); margin-top: 1px; }
+    .card-body { padding: 24px; }
+
+    /* ===== FORM ===== */
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+    }
+    .form-group label i { color: var(--accent-blue); font-size: 0.75rem; }
+
+    .form-control {
+      width: 100%; padding: 11px 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      outline: none;
+      appearance: none;
+    }
+    [data-theme="light"] .form-control { background: rgba(255,255,255,0.8); }
+    .form-control:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+      background: rgba(59,130,246,0.05);
+    }
+    .form-control option { background: var(--bg-secondary); }
+
+    /* Range slider */
+    .range-wrapper { position: relative; }
+    .range-value {
+      position: absolute; right: 0; top: -28px;
+      font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan);
+      background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3);
+      padding: 2px 8px; border-radius: 8px;
+    }
+    input[type=range] {
+      width: 100%; height: 6px; border-radius: 3px;
+      background: linear-gradient(90deg, var(--accent-blue) 0%, var(--border-color) 0%);
+      border: none; padding: 0; cursor: pointer;
+      -webkit-appearance: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+      background: var(--accent-blue); cursor: pointer;
+      box-shadow: 0 0 8px rgba(59,130,246,0.5);
+      transition: transform 0.2s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+    /* Zone indicator */
+    .zone-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .zone-tab {
+      flex: 1; padding: 8px; text-align: center; border-radius: 8px;
+      border: 1px solid var(--border-color);
+      font-size: 0.75rem; font-weight: 600; cursor: pointer;
+      transition: all 0.3s ease; color: var(--text-secondary);
+      background: transparent;
+    }
+    .zone-tab.active { background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); color: white; border-color: transparent; box-shadow: var(--glow-blue); }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      color: white; border: none; border-radius: 12px;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      letter-spacing: 0.5px;
+      position: relative; overflow: hidden;
+      transition: all 0.3s ease;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(59,130,246,0.4); }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit .ripple {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      animation: ripple-anim 0.6s linear;
+      pointer-events: none;
+    }
+    @keyframes ripple-anim {
+      from { width: 0; height: 0; opacity: 1; transform: translate(-50%, -50%); }
+      to { width: 300px; height: 300px; opacity: 0; transform: translate(-50%, -50%); }
+    }
+
+    .btn-random {
+      width: 100%; padding: 11px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary); border-radius: 10px;
+      font-size: 0.82rem; cursor: pointer;
+      transition: all 0.3s ease; margin-top: 10px;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+    }
+    .btn-random:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); background: rgba(6,182,212,0.05); }
+
+    /* ===== RIGHT PANEL ===== */
+    .right-panel { display: flex; flex-direction: column; gap: 22px; }
+
+    /* Result Cards */
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 20px;
+      text-align: center; position: relative; overflow: hidden;
+      transition: all 0.4s ease;
+      animation: none;
+    }
+    .result-card.animate { animation: cardPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @keyframes cardPop { 0% { transform: scale(0.9); opacity: 0.5; } 60% { transform: scale(1.03); } 100% { transform: scale(1); opacity: 1; } }
+
+    .result-card.status-normal { border-color: rgba(16,185,129,0.4); box-shadow: var(--glow-green); }
+    .result-card.status-overload { border-color: rgba(239,68,68,0.5); box-shadow: var(--glow-red); animation: cardPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), overloadPulse 1.5s ease-in-out infinite 0.5s; }
+    @keyframes overloadPulse {
+      0%, 100% { box-shadow: var(--glow-red); }
+      50% { box-shadow: 0 0 40px rgba(239,68,68,0.7), 0 0 80px rgba(239,68,68,0.3); }
+    }
+
+    .result-card-icon { font-size: 1.8rem; margin-bottom: 10px; }
+    .result-card-value { font-size: 1.7rem; font-weight: 800; line-height: 1; }
+    .result-card-label { font-size: 0.72rem; color: var(--text-secondary); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .result-card-sub { font-size: 0.78rem; margin-top: 8px; font-weight: 600; padding: 3px 10px; border-radius: 12px; display: inline-block; }
+
+    /* Decision box */
+    .decision-box {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 20px;
+      display: flex; align-items: flex-start; gap: 16px;
+      transition: all 0.4s ease;
+    }
+    .decision-icon {
+      width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 22px;
+    }
+    .decision-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 4px; }
+    .decision-value { font-size: 1rem; font-weight: 700; }
+    .decision-action { font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px; }
+
+    /* Suggestion box */
+    .suggestion-box {
+      background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(59,130,246,0.1));
+      border: 1px solid rgba(139,92,246,0.25);
+      border-radius: 16px; padding: 18px 20px;
+      display: flex; align-items: center; gap: 14px;
+      transition: all 0.4s ease;
+    }
+    .suggestion-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .suggestion-text { font-size: 0.88rem; line-height: 1.5; }
+    .suggestion-text strong { color: var(--accent-purple); display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+
+    /* Zone shift box */
+    .zone-shift-box {
+      background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.1));
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 16px; padding: 16px 20px;
+      display: flex; align-items: center; gap: 12px;
+      display: none;
+    }
+    .zone-shift-box.visible { display: flex; animation: fadeInLeft 0.5s ease; }
+    @keyframes fadeInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+
+    /* ===== CHART SECTION ===== */
+    .chart-section { animation: fadeInUp 0.7s ease 0.6s both; }
+    .chart-wrapper { position: relative; height: 280px; }
+
+    /* ===== ZONE MONITORING ===== */
+    .zone-monitoring { animation: fadeInUp 0.7s ease 0.8s both; margin-top: 22px; }
+    .zone-bars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .zone-bar-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 18px;
+      transition: all 0.3s ease;
+    }
+    .zone-bar-card:hover { transform: translateY(-3px); background: var(--bg-card-hover); }
+    .zone-bar-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .zone-bar-name { font-size: 0.85rem; font-weight: 700; }
+    .zone-bar-val { font-size: 0.78rem; font-weight: 600; color: var(--accent-cyan); }
+    .progress-track {
+      height: 8px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden;
+    }
+    [data-theme="light"] .progress-track { background: rgba(0,0,0,0.08); }
+    .progress-fill {
+      height: 100%; border-radius: 4px;
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .zone-bar-status { font-size: 0.7rem; margin-top: 8px; font-weight: 600; }
+
+    /* ===== ALERT OVERLAY ===== */
+    #alertOverlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      z-index: 1000; display: none;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(6px);
+      animation: none;
+    }
+    #alertOverlay.show { display: flex; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .alert-modal {
+      background: var(--bg-secondary); border: 1px solid rgba(239,68,68,0.4);
+      border-radius: 24px; padding: 36px 40px; max-width: 440px; width: 90%;
+      text-align: center; position: relative;
+      box-shadow: 0 0 60px rgba(239,68,68,0.3), 0 25px 50px rgba(0,0,0,0.5);
+      animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes modalPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .alert-icon { font-size: 3rem; margin-bottom: 16px; animation: shake 0.5s ease infinite alternate; }
+    @keyframes shake { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
+    .alert-title { font-size: 1.4rem; font-weight: 800; color: var(--accent-red); margin-bottom: 10px; }
+    .alert-msg { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px; }
+    .alert-close {
+      padding: 12px 32px; background: linear-gradient(135deg, #ef4444, #b91c1c);
+      color: white; border: none; border-radius: 10px; font-size: 0.9rem;
+      font-weight: 700; cursor: pointer; transition: all 0.3s;
+    }
+    .alert-close:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(239,68,68,0.5); }
+
+    /* ===== HISTORY TABLE ===== */
+    .history-section { animation: fadeInUp 0.7s ease 1s both; margin-top: 22px; }
+    .history-table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    thead tr { border-bottom: 1px solid var(--border-color); }
+    th { padding: 10px 14px; text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); font-weight: 600; }
+    td { padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    [data-theme="light"] td { border-bottom: 1px solid rgba(0,0,0,0.05); }
+    tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background 0.2s; }
+    tbody tr:hover { background: var(--bg-card-hover); }
+    .badge { padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; }
+    .badge-normal { background: rgba(16,185,129,0.15); color: var(--accent-green); border: 1px solid rgba(16,185,129,0.3); }
+    .badge-overload { background: rgba(239,68,68,0.15); color: var(--accent-red); border: 1px solid rgba(239,68,68,0.3); }
+
+    /* Placeholder state */
+    .placeholder-state {
+      text-align: center; padding: 50px 20px;
+      color: var(--text-secondary);
+    }
+    .placeholder-state i { font-size: 3rem; margin-bottom: 16px; opacity: 0.3; display: block; }
+    .placeholder-state p { font-size: 0.88rem; }
+
+    /* Loading spinner inside button */
+    .spinner {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white; animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Animated counter */
+    .counting { animation: countPulse 0.1s ease; }
+    @keyframes countPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+    /* Utility */
+    .text-blue { color: var(--accent-blue); }
+    .text-cyan { color: var(--accent-cyan); }
+    .text-green { color: var(--accent-green); }
+    .text-red { color: var(--accent-red); }
+    .text-purple { color: var(--accent-purple); }
+    .text-orange { color: var(--accent-orange); }
+    .hidden { display: none !important; }
+
+    .section-title {
+      font-size: 0.95rem; font-weight: 700; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--border-color);
+    }
+
+    /* Fade in result area */
+    #resultArea { transition: opacity 0.4s ease; }
+    #resultArea.loading { opacity: 0.4; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .zone-bars { grid-template-columns: 1fr; }
+      .result-grid { grid-template-columns: repeat(2, 1fr); }
+      .alert-modal { padding: 24px 20px; }
+    }
+    @media (max-width: 480px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .result-grid { grid-template-columns: 1fr 1fr; }
+      .header-inner { gap: 8px; }
+      .logo-text h1 { font-size: 1rem; }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); }
+
+    /* Tooltip */
+    [data-tooltip] { position: relative; cursor: help; }
+    [data-tooltip]:hover::after {
+      content: attr(data-tooltip);
+      position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+      background: var(--bg-secondary); border: 1px solid var(--border-color);
+      padding: 5px 10px; border-radius: 6px; font-size: 0.72rem;
+      white-space: nowrap; z-index: 10; margin-bottom: 6px;
+      pointer-events: none; color: var(--text-primary);
+    }
+
+    /* Mini waveform animation in header */
+    .wave-bars { display: flex; align-items: center; gap: 3px; height: 20px; }
+    .wave-bar {
+      width: 3px; border-radius: 2px;
+      background: var(--accent-cyan);
+      animation: wavebar 1.2s ease-in-out infinite;
+    }
+    .wave-bar:nth-child(1) { animation-delay: 0s; }
+    .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.6s; }
+    @keyframes wavebar {
+      0%, 100% { height: 4px; }
+      50% { height: 18px; }
+    }
+
+    /* Power flow indicator */
+    .power-flow {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.72rem; color: var(--text-secondary); margin-top: 12px;
+    }
+    .flow-line {
+      flex: 1; height: 2px; border-radius: 1px; position: relative; overflow: hidden;
+      background: var(--border-color);
+    }
+    .flow-line::after {
+      content: ''; position: absolute; top: 0; left: -100%;
+      width: 100%; height: 100%; border-radius: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+      animation: flowAnim 2s linear infinite;
+    }
+    @keyframes flowAnim { from { left: -100%; } to { left: 100%; } }
+  </style>
+</head>
+<body>
+
+<!-- Particles -->
+<div id="particles-bg"></div>
+
+<!-- Alert Overlay -->
+<div id="alertOverlay">
+  <div class="alert-modal">
+    <div class="alert-icon">⚡</div>
+    <div class="alert-title">OVERLOAD DETECTED</div>
+    <div class="alert-msg" id="alertMsg">
+      Critical power load threshold exceeded. Immediate action required to prevent grid failure and cascading outages.
+    </div>
+    <button class="alert-close" onclick="closeAlert()">
+      <i class="fa fa-check-circle"></i> Acknowledge &amp; Act
+    </button>
+  </div>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon"><i class="fa fa-bolt"></i></div>
+        <div class="logo-text">
+          <h1>PowerGrid AI</h1>
+          <p>Smart Load Balancer Dashboard</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="wave-bars">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+        <div id="liveClock">00:00:00</div>
+        <div class="status-badge">
+          <div class="status-dot"></div>
+          SYSTEM ONLINE
+        </div>
+        <button class="theme-btn" onclick="toggleTheme()" title="Toggle Theme">
+          <i class="fa fa-moon" id="themeIcon"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main>
+  <div class="container">
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-card" style="--card-accent: var(--accent-blue)">
+        <div class="stat-icon" style="background:rgba(59,130,246,0.15); color:var(--accent-blue)">
+          <i class="fa fa-plug"></i>
+        </div>
+        <div class="stat-value" id="statTotalLoad">0</div>
+        <div class="stat-label">Total Load (MW)</div>
+        <div class="stat-change up" id="statLoadChange"><i class="fa fa-arrow-up"></i> Updated live</div>
+      </div>
+      <div class="stat-card" style="--card-accent: var(--accent-cyan)">
+        <div class="stat-icon" style="background:rgba(6,182,212,0.15); color:var(--accent-cyan)">
+          <i class="fa fa-brain"></i>
+        </div>
+        <div class="stat-value" id="statPredicted">0</div>
+        <div class="stat-label">AI Predicted (MW)</div>
+        <div class="stat-change" id="statPredChange" style="color:var(--accent-cyan)"><i class="fa fa-magic"></i> AI Engine</div>
+      </div>
+      <div class="stat-card" style="--card-accent: var(--accent-green)">
+        <div class="stat-icon" style="background:rgba(16,185,129,0.15); color:var(--accent-green)">
+          <i class="fa fa-chart-line"></i>
+        </div>
+        <div class="stat-value" id="statEfficiency">100%</div>
+        <div class="stat-label">Grid Efficiency</div>
+        <div class="stat-change up"><i class="fa fa-check-circle"></i> Optimal</div>
+      </div>
+      <div class="stat-card" style="--card-accent: var(--accent-purple)">
+        <div class="stat-icon" style="background:rgba(139,92,246,0.15); color:var(--accent-purple)">
+          <i class="fa fa-history"></i>
+        </div>
+        <div class="stat-value" id="statAnalyses">0</div>
+        <div class="stat-label">Analyses Run</div>
+        <div class="stat-change" style="color:var(--accent-purple)"><i class="fa fa-database"></i> Logged</div>
+      </div>
+      <div class="stat-card" style="--card-accent: var(--accent-orange)">
+        <div class="stat-icon" style="background:rgba(245,158,11,0.15); color:var(--accent-orange)">
+          <i class="fa fa-thermometer-half"></i>
+        </div>
+        <div class="stat-value" id="statTemp">—°C</div>
+        <div class="stat-label">Temperature</div>
+        <div class="stat-change" style="color:var(--accent-orange)"><i class="fa fa-sun"></i> Ambient</div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+
+      <!-- LEFT: Admin Panel -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-icon" style="background:rgba(59,130,246,0.15); color:var(--accent-blue)">
+              <i class="fa fa-sliders-h"></i>
+            </div>
+            <div>
+              <h2>Admin Control Panel</h2>
+              <p>Configure load parameters</p>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <!-- Zone Tabs -->
+            <div style="margin-bottom:20px;">
+              <label style="font-size:0.78rem; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">
+                <i class="fa fa-map-marker-alt text-blue" style="margin-right:6px;"></i>Select Zone
+              </label>
+              <div class="zone-tabs">
+                <button class="zone-tab active" onclick="selectZone('A', this)">Zone A</button>
+                <button class="zone-tab" onclick="selectZone('B', this)">Zone B</button>
+                <button class="zone-tab" onclick="selectZone('C', this)">Zone C</button>
+              </div>
+              <input type="hidden" id="zoneInput" value="A"/>
+            </div>
+
+            <!-- Current Load -->
+            <div class="form-group">
+              <label for="loadInput">
+                <i class="fa fa-bolt"></i> Current Load
+                <span style="margin-left:auto; font-size:0.82rem; color:var(--accent-cyan); font-weight:700;" id="loadDisplay">— MW</span>
+              </label>
+              <input type="number" id="loadInput" class="form-control" placeholder="Enter load in MW (e.g. 80)"
+                min="0" max="300" step="0.5" oninput="document.getElementById('loadDisplay').textContent=this.value?this.value+' MW':'— MW'"/>
+            </div>
+
+            <!-- Temperature -->
+            <div class="form-group">
+              <label for="tempInput">
+                <i class="fa fa-thermometer-half"></i> Temperature
+                <span style="margin-left:auto; font-size:0.82rem; color:var(--accent-orange); font-weight:700;" id="tempDisplay">—°C</span>
+              </label>
+              <input type="number" id="tempInput" class="form-control" placeholder="Temperature in °C (e.g. 32)"
+                min="-20" max="60" step="0.5" oninput="document.getElementById('tempDisplay').textContent=this.value?this.value+'°C':'—°C'"/>
+            </div>
+
+            <!-- Time Slider -->
+            <div class="form-group">
+              <label for="timeInput">
+                <i class="fa fa-clock"></i> Time of Day
+              </label>
+              <div class="range-wrapper" style="margin-top:32px;">
+                <span class="range-value" id="timeDisplay">0:00</span>
+                <input type="range" id="timeInput" min="0" max="23" value="0" step="1" oninput="updateTimeSlider(this.value)"/>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-secondary); margin-top:6px;">
+                <span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>11 PM</span>
+              </div>
+            </div>
+
+            <!-- Power Flow Indicator -->
+            <div class="power-flow">
+              <span>Grid</span>
+              <div class="flow-line"></div>
+              <span><i class="fa fa-bolt" style="color:var(--accent-cyan)"></i></span>
+              <div class="flow-line"></div>
+              <span>Zone <span id="flowZone">A</span></span>
+            </div>
+
+            <!-- Buttons -->
+            <div style="margin-top:22px;">
+              <button class="btn-submit" id="submitBtn" onclick="analyzeLoad(event)">
+                <i class="fa fa-microchip"></i>
+                <span id="submitText">Run AI Analysis</span>
+              </button>
+              <button class="btn-random" onclick="randomize()">
+                <i class="fa fa-random"></i> Simulate Random Data
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Mini zone loads -->
+        <div class="card" style="margin-top:18px;">
+          <div class="card-header">
+            <div class="card-header-icon" style="background:rgba(6,182,212,0.15); color:var(--accent-cyan)">
+              <i class="fa fa-network-wired"></i>
+            </div>
+            <div>
+              <h2>Zone Load Overview</h2>
+              <p>Real-time distribution</p>
+            </div>
+          </div>
+          <div class="card-body" style="padding:18px 24px;">
+            <div style="display:flex; flex-direction:column; gap:14px;" id="zoneMiniView">
+              <!-- Zone mini bars will be rendered here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Results & Chart -->
+      <div class="right-panel">
+
+        <!-- Result Cards -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-header-icon" style="background:rgba(16,185,129,0.15); color:var(--accent-green)">
+              <i class="fa fa-robot"></i>
+            </div>
+            <div>
+              <h2>AI Analysis Results</h2>
+              <p>Intelligent load prediction output</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="resultArea">
+              <!-- Placeholder -->
+              <div id="placeholderState" class="placeholder-state">
+                <i class="fa fa-bolt"></i>
+                <p>Run an analysis to see intelligent predictions and decisions from the AI engine.</p>
+              </div>
+
+              <!-- Results (hidden initially) -->
+              <div id="resultsContent" class="hidden">
+                <div class="result-grid" style="margin-bottom:16px;">
+                  <div class="result-card" id="rcCurrentLoad">
+                    <div class="result-card-icon">⚡</div>
+                    <div class="result-card-value" id="rcCurrentLoadVal">0</div>
+                    <div class="result-card-label">Current Load (MW)</div>
+                    <div class="result-card-sub" style="background:rgba(59,130,246,0.1); color:var(--accent-blue)">Input</div>
+                  </div>
+                  <div class="result-card" id="rcPredicted">
+                    <div class="result-card-icon">🧠</div>
+                    <div class="result-card-value" id="rcPredictedVal">0</div>
+                    <div class="result-card-label">Predicted Load (MW)</div>
+                    <div class="result-card-sub" style="background:rgba(6,182,212,0.1); color:var(--accent-cyan)">AI Forecast</div>
+                  </div>
+                  <div class="result-card" id="rcStatus">
+                    <div class="result-card-icon" id="rcStatusIcon">✅</div>
+                    <div class="result-card-value" id="rcStatusVal" style="font-size:1.1rem;">NORMAL</div>
+                    <div class="result-card-label">Grid Status</div>
+                    <div class="result-card-sub" id="rcStatusSub" style="background:rgba(16,185,129,0.1); color:var(--accent-green)">Stable</div>
+                  </div>
+                  <div class="result-card" id="rcZone">
+                    <div class="result-card-icon">🗺️</div>
+                    <div class="result-card-value" id="rcZoneVal" style="font-size:1.2rem;">Zone A</div>
+                    <div class="result-card-label">Active Zone</div>
+                    <div class="result-card-sub" style="background:rgba(139,92,246,0.1); color:var(--accent-purple)">Monitored</div>
+                  </div>
+                </div>
+
+                <!-- Decision Row -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;" id="decisionRow">
+                  <div class="decision-box" id="decisionBox">
+                    <div class="decision-icon" id="decisionIcon" style="background:rgba(16,185,129,0.15); color:var(--accent-green)">
+                      <i class="fa fa-check-circle"></i>
+                    </div>
+                    <div>
+                      <div class="decision-title">System Decision</div>
+                      <div class="decision-value" id="decisionValue">Stable Grid</div>
+                      <div class="decision-action" id="decisionAction">All zones operating within limits</div>
+                    </div>
+                  </div>
+                  <div class="decision-box" id="actionBox">
+                    <div class="decision-icon" style="background:rgba(6,182,212,0.15); color:var(--accent-cyan)">
+                      <i class="fa fa-cogs"></i>
+                    </div>
+                    <div>
+                      <div class="decision-title">Recommended Action</div>
+                      <div class="decision-value" id="actionValue">Monitor Load</div>
+                      <div class="decision-action" id="actionDetail">Continue normal operations</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Suggestion -->
+                <div class="suggestion-box" id="suggestionBox">
+                  <div class="suggestion-icon">💡</div>
+                  <div class="suggestion-text">
+                    <strong>Smart Suggestion</strong>
+                    <span id="suggestionText">Run analysis to get smart suggestions.</span>
+                  </div>
+                </div>
+
+                <!-- Zone Shift Alert -->
+                <div class="zone-shift-box" id="zoneShiftBox" style="margin-top:12px;">
+                  <span style="font-size:1.4rem;">🔄</span>
+                  <div>
+                    <div style="font-size:0.72rem; text-transform:uppercase; font-weight:700; color:var(--accent-orange); letter-spacing:0.5px;">Zone Redistribution Required</div>
+                    <div id="zoneShiftText" style="font-size:0.85rem; margin-top:3px;">Shift load from Zone A to Zone B</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="card chart-section">
+          <div class="card-header">
+            <div class="card-header-icon" style="background:rgba(139,92,246,0.15); color:var(--accent-purple)">
+              <i class="fa fa-chart-area"></i>
+            </div>
+            <div>
+              <h2>Load Trend Analysis</h2>
+              <p>Current vs Predicted load over sessions</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrapper">
+              <canvas id="loadChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Zone Monitoring -->
+    <div class="zone-monitoring">
+      <div class="section-title"><i class="fa fa-th" style="color:var(--accent-blue)"></i> Zone Monitoring Grid</div>
+      <div class="zone-bars">
+        <div class="zone-bar-card">
+          <div class="zone-bar-label">
+            <div class="zone-bar-name"><i class="fa fa-map-pin text-blue" style="margin-right:5px;"></i>Zone A</div>
+            <div class="zone-bar-val" id="zoneAVal">0 MW</div>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="zoneABar" style="width:0%; background:linear-gradient(90deg,var(--accent-blue),var(--accent-cyan))"></div>
+          </div>
+          <div class="zone-bar-status" id="zoneAStatus" style="color:var(--accent-green)">● Normal</div>
+        </div>
+        <div class="zone-bar-card">
+          <div class="zone-bar-label">
+            <div class="zone-bar-name"><i class="fa fa-map-pin text-purple" style="margin-right:5px;"></i>Zone B</div>
+            <div class="zone-bar-val" id="zoneBVal">0 MW</div>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="zoneBBar" style="width:0%; background:linear-gradient(90deg,var(--accent-purple),var(--accent-blue))"></div>
+          </div>
+          <div class="zone-bar-status" id="zoneBStatus" style="color:var(--accent-green)">● Normal</div>
+        </div>
+        <div class="zone-bar-card">
+          <div class="zone-bar-label">
+            <div class="zone-bar-name"><i class="fa fa-map-pin text-cyan" style="margin-right:5px;"></i>Zone C</div>
+            <div class="zone-bar-val" id="zoneCVal">0 MW</div>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="zoneCBar" style="width:0%; background:linear-gradient(90deg,var(--accent-cyan),var(--accent-green))"></div>
+          </div>
+          <div class="zone-bar-status" id="zoneCStatus" style="color:var(--accent-green)">● Normal</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="history-section">
+      <div class="card" style="margin-top:22px;">
+        <div class="card-header" style="justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="card-header-icon" style="background:rgba(245,158,11,0.15); color:var(--accent-orange)">
+              <i class="fa fa-history"></i>
+            </div>
+            <div>
+              <h2>Analysis History Log</h2>
+              <p>Past predictions and decisions</p>
+            </div>
+          </div>
+          <button onclick="clearHistory()" style="font-size:0.75rem; padding:6px 14px; border-radius:8px; border:1px solid var(--border-color); background:transparent; color:var(--text-secondary); cursor:pointer; transition:all 0.3s;" onmouseover="this.style.borderColor='var(--accent-red)'; this.style.color='var(--accent-red)';" onmouseout="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-secondary)';">
+            <i class="fa fa-trash"></i> Clear
+          </button>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <div class="history-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Zone</th>
+                  <th>Current Load</th>
+                  <th>Temp</th>
+                  <th>Time</th>
+                  <th>Predicted</th>
+                  <th>Status</th>
+                  <th>Decision</th>
+                  <th>Timestamp</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody">
+                <tr>
+                  <td colspan="9" style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.82rem;">
+                    <i class="fa fa-inbox" style="font-size:1.5rem; display:block; margin-bottom:8px; opacity:0.4;"></i>
+                    No analyses yet. Run an analysis to see history.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  // ========== STATE ==========
+  let zoneLoads = { A: 0, B: 0, C: 0 };
+  let historyLog = [];
+  let analysisCount = 0;
+  let chartInstance = null;
+  let chartLabels = [];
+  let chartCurrentData = [];
+  let chartPredictedData = [];
+  const MAX_CHART_POINTS = 10;
+
+  // ========== THEME ==========
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('themeIcon').className = isDark ? 'fa fa-moon' : 'fa fa-sun';
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    if (chartInstance) updateChartTheme();
+  }
+
+  function updateChartTheme() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)';
+    const textColor = isDark ? '#8b9ac7' : '#64748b';
+    chartInstance.options.scales.x.grid.color = gridColor;
+    chartInstance.options.scales.y.grid.color = gridColor;
+    chartInstance.options.scales.x.ticks.color = textColor;
+    chartInstance.options.scales.y.ticks.color = textColor;
+    chartInstance.update();
+  }
+
+  (function loadTheme() {
+    const saved = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    document.getElementById('themeIcon').className = saved === 'dark' ? 'fa fa-moon' : 'fa fa-sun';
+  })();
+
+  // ========== CLOCK ==========
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('liveClock').textContent = `${h}:${m}:${s}`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // ========== PARTICLES ==========
+  (function createParticles() {
+    const container = document.getElementById('particles-bg');
+    const colors = ['#3b82f6','#06b6d4','#8b5cf6','#10b981'];
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = Math.random() * 4 + 2;
+      p.style.cssText = `
+        width:${size}px; height:${size}px;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        left:${Math.random()*100}%;
+        animation-duration:${Math.random()*15+10}s;
+        animation-delay:${Math.random()*10}s;
+      `;
+      container.appendChild(p);
+    }
+  })();
+
+  // ========== ZONE SELECTION ==========
+  function selectZone(zone, btn) {
+    document.querySelectorAll('.zone-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('zoneInput').value = zone;
+    document.getElementById('flowZone').textContent = zone;
+  }
+
+  // ========== TIME SLIDER ==========
+  function updateTimeSlider(val) {
+    const h = parseInt(val);
+    const label = h === 0 ? '12:00 AM' : h < 12 ? `${h}:00 AM` : h === 12 ? '12:00 PM' : `${h-12}:00 PM`;
+    document.getElementById('timeDisplay').textContent = label;
+    const pct = (h / 23) * 100;
+    document.getElementById('timeInput').style.background =
+      `linear-gradient(90deg, var(--accent-blue) ${pct}%, var(--border-color) ${pct}%)`;
+  }
+  updateTimeSlider(0);
+
+  // ========== CHART INIT ==========
+  function initChart() {
+    const ctx = document.getElementById('loadChart').getContext('2d');
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)';
+    const textColor = isDark ? '#8b9ac7' : '#64748b';
+
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartLabels,
+        datasets: [
+          {
+            label: 'Current Load (MW)',
+            data: chartCurrentData,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59,130,246,0.1)',
+            borderWidth: 2.5,
+            pointBackgroundColor: '#3b82f6',
+            pointRadius: 5, pointHoverRadius: 8,
+            tension: 0.4, fill: true,
+          },
+          {
+            label: 'Predicted Load (MW)',
+            data: chartPredictedData,
+            borderColor: '#06b6d4',
+            backgroundColor: 'rgba(6,182,212,0.07)',
+            borderWidth: 2.5,
+            borderDash: [6,3],
+            pointBackgroundColor: '#06b6d4',
+            pointRadius: 5, pointHoverRadius: 8,
+            tension: 0.4, fill: true,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { color: textColor, font: { size: 12 }, padding: 16, usePointStyle: true, pointStyleWidth: 10 }
+          },
+          tooltip: {
+            backgroundColor: isDark ? 'rgba(17,24,39,0.95)' : 'rgba(255,255,255,0.95)',
+            titleColor: isDark ? '#f0f4ff' : '#0f172a',
+            bodyColor: isDark ? '#8b9ac7' : '#475569',
+            borderColor: 'rgba(59,130,246,0.3)',
+            borderWidth: 1,
+            padding: 12,
+            callbacks: {
+              label: ctx => ` ${ctx.dataset.label}: ${ctx.raw.toFixed(1)} MW`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: gridColor },
+            ticks: { color: textColor, font: { size: 11 } }
+          },
+          y: {
+            grid: { color: gridColor },
+            ticks: { color: textColor, font: { size: 11 }, callback: v => v + ' MW' },
+            beginAtZero: true
+          }
+        },
+        animation: { duration: 800, easing: 'easeInOutQuart' }
+      }
+    });
+  }
+  initChart();
+
+  // ========== ZONE MINI VIEW ==========
+  function renderZoneMiniView() {
+    const container = document.getElementById('zoneMiniView');
+    const zones = ['A','B','C'];
+    const colors = {
+      A: 'linear-gradient(90deg,var(--accent-blue),var(--accent-cyan))',
+      B: 'linear-gradient(90deg,var(--accent-purple),var(--accent-blue))',
+      C: 'linear-gradient(90deg,var(--accent-cyan),var(--accent-green))'
+    };
+    container.innerHTML = zones.map(z => {
+      const load = zoneLoads[z];
+      const pct = Math.min((load / 200) * 100, 100).toFixed(0);
+      const status = load > 150 ? 'OVERLOAD' : 'Normal';
+      const statusColor = load > 150 ? 'var(--accent-red)' : 'var(--accent-green)';
+      return `
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+            <span style="font-size:0.78rem; font-weight:700;">Zone ${z}</span>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:0.72rem; color:${statusColor}; font-weight:600;">● ${status}</span>
+              <span style="font-size:0.78rem; color:var(--accent-cyan); font-weight:700;">${load} MW</span>
+            </div>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width:${pct}%; background:${colors[z]}"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  renderZoneMiniView();
+
+  // ========== ANIMATED COUNTER ==========
+  function animateCounter(el, start, end, duration = 800, suffix = '') {
+    const startTime = performance.now();
+    const update = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = start + (end - start) * eased;
+      el.textContent = Number.isInteger(end) ? Math.round(current) + suffix : current.toFixed(1) + suffix;
+      if (progress < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+  }
+
+  // ========== RIPPLE ==========
+  function createRipple(e, btn) {
+    const r = document.createElement('span');
+    r.className = 'ripple';
+    const rect = btn.getBoundingClientRect();
+    r.style.left = (e.clientX - rect.left) + 'px';
+    r.style.top = (e.clientY - rect.top) + 'px';
+    btn.appendChild(r);
+    setTimeout(() => r.remove(), 700);
+  }
+
+  // ========== RANDOMIZE ==========
+  function randomize() {
+    const zones = ['A','B','C'];
+    const randomZone = zones[Math.floor(Math.random() * 3)];
+    document.querySelectorAll('.zone-tab').forEach((t, i) => {
+      t.classList.toggle('active', zones[i] === randomZone);
+    });
+    document.getElementById('zoneInput').value = randomZone;
+    document.getElementById('flowZone').textContent = randomZone;
+
+    const load = Math.round(Math.random() * 200 + 20);
+    const temp = Math.round(Math.random() * 50 + 10);
+    const time = Math.round(Math.random() * 23);
+
+    document.getElementById('loadInput').value = load;
+    document.getElementById('tempInput').value = temp;
+    document.getElementById('timeInput').value = time;
+    document.getElementById('loadDisplay').textContent = load + ' MW';
+    document.getElementById('tempDisplay').textContent = temp + '°C';
+    updateTimeSlider(time);
+  }
+
+  // ========== MAIN ANALYSIS ==========
+  async function analyzeLoad(e) {
+    const btn = document.getElementById('submitBtn');
+    createRipple(e, btn);
+
+    // Loading state
+    btn.innerHTML = '<div class="spinner"></div><span>Analyzing...</span>';
+    btn.disabled = true;
+    document.getElementById('resultArea').classList.add('loading');
+
+    await new Promise(r => setTimeout(r, 900));
+
+    const zone = document.getElementById('zoneInput').value;
+    const load = parseFloat(document.getElementById('loadInput').value);
+    const temp = parseFloat(document.getElementById('tempInput').value);
+    const time = parseInt(document.getElementById('timeInput').value);
+
+    // Validation
+    if (isNaN(load) || isNaN(temp)) {
+      btn.innerHTML = '<i class="fa fa-microchip"></i><span>Run AI Analysis</span>';
+      btn.disabled = false;
+      document.getElementById('resultArea').classList.remove('loading');
+      showValidationError();
+      return;
+    }
+
+    // === INTELLIGENCE ENGINE ===
+    const predictedLoad = load + (temp * 0.5) + (time * 1.2);
+
+    let status, action, statusClass;
+    if (predictedLoad > 150) {
+      status = 'OVERLOAD';
+      action = 'Redistribute Power';
+      statusClass = 'status-overload';
+    } else {
+      status = 'NORMAL';
+      action = 'Stable';
+      statusClass = 'status-normal';
+    }
+
+    let suggestion;
+    if (time >= 18) {
+      suggestion = '🌙 Peak hours detected! Use heavy appliances after 10 PM to avoid demand surges.';
+    } else if (time < 6) {
+      suggestion = '🌙 Off-peak hours: Great time to schedule high-load operations for cost savings.';
+    } else if (time >= 12 && time < 15) {
+      suggestion = '☀️ Midday peak window. Solar generation at maximum — consider grid offloading.';
+    } else {
+      suggestion = '✅ Optimal usage time — load within acceptable operational limits.';
+    }
+
+    // Zone loads update
+    zoneLoads[zone] = parseFloat(predictedLoad.toFixed(1));
+    const otherZones = ['A','B','C'].filter(z => z !== zone);
+    if (!zoneLoads[otherZones[0]]) zoneLoads[otherZones[0]] = Math.round(Math.random() * 80 + 30);
+    if (!zoneLoads[otherZones[1]]) zoneLoads[otherZones[1]] = Math.round(Math.random() * 80 + 30);
+
+    // Multi-zone logic
+    let showZoneShift = false;
+    let zoneShiftText = '';
+    if (zone === 'A' && status === 'OVERLOAD' && zoneLoads['B'] < 100) {
+      showZoneShift = true;
+      zoneShiftText = `Shift ${(predictedLoad - 150).toFixed(0)} MW excess from Zone A → Zone B (Available capacity: ${(100 - zoneLoads['B']).toFixed(0)} MW)`;
+    } else if (zone === 'B' && status === 'OVERLOAD' && zoneLoads['C'] < 100) {
+      showZoneShift = true;
+      zoneShiftText = `Shift ${(predictedLoad - 150).toFixed(0)} MW excess from Zone B → Zone C (Available capacity: ${(100 - zoneLoads['C']).toFixed(0)} MW)`;
+    } else if (zone === 'C' && status === 'OVERLOAD' && zoneLoads['A'] < 100) {
+      showZoneShift = true;
+      zoneShiftText = `Shift ${(predictedLoad - 150).toFixed(0)} MW excess from Zone C → Zone A (Available capacity: ${(100 - zoneLoads['A']).toFixed(0)} MW)`;
+    }
+
+    // === UPDATE UI ===
+    document.getElementById('resultArea').classList.remove('loading');
+    document.getElementById('placeholderState').classList.add('hidden');
+    document.getElementById('resultsContent').classList.remove('hidden');
+
+    // Animate result cards
+    ['rcCurrentLoad','rcPredicted','rcStatus','rcZone'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      el.className = 'result-card';
+      void el.offsetWidth;
+      setTimeout(() => { el.classList.add('animate'); }, i * 100);
+    });
+
+    // Set values with animated counters
+    setTimeout(() => {
+      animateCounter(document.getElementById('rcCurrentLoadVal'), 0, load, 800);
+      animateCounter(document.getElementById('rcPredictedVal'), 0, predictedLoad, 800);
+    }, 200);
+
+    document.getElementById('rcStatusVal').textContent = status;
+    document.getElementById('rcZoneVal').textContent = `Zone ${zone}`;
+
+    if (status === 'OVERLOAD') {
+      document.getElementById('rcStatus').className = 'result-card status-overload';
+      document.getElementById('rcStatusIcon').textContent = '⚠️';
+      document.getElementById('rcStatusSub').style.background = 'rgba(239,68,68,0.1)';
+      document.getElementById('rcStatusSub').style.color = 'var(--accent-red)';
+      document.getElementById('rcStatusSub').textContent = 'Critical';
+      document.getElementById('decisionIcon').style.background = 'rgba(239,68,68,0.15)';
+      document.getElementById('decisionIcon').style.color = 'var(--accent-red)';
+      document.getElementById('decisionIcon').innerHTML = '<i class="fa fa-exclamation-triangle"></i>';
+      document.getElementById('decisionValue').textContent = 'OVERLOAD DETECTED';
+      document.getElementById('decisionValue').style.color = 'var(--accent-red)';
+      document.getElementById('decisionAction').textContent = `Predicted: ${predictedLoad.toFixed(1)} MW exceeds 150 MW threshold`;
+      document.getElementById('actionValue').textContent = action;
+      document.getElementById('actionDetail').textContent = 'Initiate emergency power redistribution protocols';
+      setTimeout(() => showAlert(zone, predictedLoad), 500);
+    } else {
+      document.getElementById('rcStatus').className = 'result-card status-normal';
+      document.getElementById('rcStatusIcon').textContent = '✅';
+      document.getElementById('rcStatusSub').style.background = 'rgba(16,185,129,0.1)';
+      document.getElementById('rcStatusSub').style.color = 'var(--accent-green)';
+      document.getElementById('rcStatusSub').textContent = 'Stable';
+      document.getElementById('decisionIcon').style.background = 'rgba(16,185,129,0.15)';
+      document.getElementById('decisionIcon').style.color = 'var(--accent-green)';
+      document.getElementById('decisionIcon').innerHTML = '<i class="fa fa-check-circle"></i>';
+      document.getElementById('decisionValue').textContent = 'STABLE GRID';
+      document.getElementById('decisionValue').style.color = 'var(--accent-green)';
+      document.getElementById('decisionAction').textContent = `Predicted: ${predictedLoad.toFixed(1)} MW — within safe limits`;
+      document.getElementById('actionValue').textContent = action;
+      document.getElementById('actionDetail').textContent = 'Continue monitoring — all zones operating optimally';
+    }
+
+    document.getElementById('suggestionText').textContent = suggestion;
+
+    const shiftBox = document.getElementById('zoneShiftBox');
+    if (showZoneShift) {
+      shiftBox.classList.add('visible');
+      document.getElementById('zoneShiftText').textContent = zoneShiftText;
+    } else {
+      shiftBox.classList.remove('visible');
+    }
+
+    // === UPDATE STATS ===
+    analysisCount++;
+    animateCounter(document.getElementById('statTotalLoad'), 0, load, 600);
+    animateCounter(document.getElementById('statPredicted'), 0, predictedLoad, 600);
+    document.getElementById('statTemp').textContent = temp + '°C';
+    document.getElementById('statAnalyses').textContent = analysisCount;
+    const efficiency = Math.max(0, Math.min(100, Math.round(100 - Math.max(0, predictedLoad - 100) / 2)));
+    document.getElementById('statEfficiency').textContent = efficiency + '%';
+
+    // === ZONE BARS ===
+    updateZoneBars();
+    renderZoneMiniView();
+
+    // === CHART ===
+    const label = `#${analysisCount} Z${zone}`;
+    chartLabels.push(label);
+    chartCurrentData.push(parseFloat(load.toFixed(1)));
+    chartPredictedData.push(parseFloat(predictedLoad.toFixed(1)));
+    if (chartLabels.length > MAX_CHART_POINTS) {
+      chartLabels.shift(); chartCurrentData.shift(); chartPredictedData.shift();
+    }
+    chartInstance.update('active');
+
+    // === HISTORY ===
+    addHistory(zone, load, temp, time, predictedLoad, status, action);
+
+    // Reset button
+    btn.innerHTML = '<i class="fa fa-microchip"></i><span>Run AI Analysis</span>';
+    btn.disabled = false;
+  }
+
+  // ========== ZONE BARS ==========
+  function updateZoneBars() {
+    ['A','B','C'].forEach(z => {
+      const load = zoneLoads[z] || 0;
+      const pct = Math.min((load / 200) * 100, 100).toFixed(1);
+      const isOverload = load > 150;
+      document.getElementById(`zone${z}Val`).textContent = load.toFixed(1) + ' MW';
+      document.getElementById(`zone${z}Bar`).style.width = pct + '%';
+      if (isOverload) {
+        document.getElementById(`zone${z}Bar`).style.background = 'linear-gradient(90deg,var(--accent-red),var(--accent-orange))';
+        document.getElementById(`zone${z}Status`).style.color = 'var(--accent-red)';
+        document.getElementById(`zone${z}Status`).textContent = '● OVERLOAD';
+      } else if (load > 100) {
+        document.getElementById(`zone${z}Bar`).style.background = 'linear-gradient(90deg,var(--accent-orange),var(--accent-red))';
+        document.getElementById(`zone${z}Status`).style.color = 'var(--accent-orange)';
+        document.getElementById(`zone${z}Status`).textContent = '● Warning';
+      } else {
+        const colors = { A: 'linear-gradient(90deg,var(--accent-blue),var(--accent-cyan))', B: 'linear-gradient(90deg,var(--accent-purple),var(--accent-blue))', C: 'linear-gradient(90deg,var(--accent-cyan),var(--accent-green))' };
+        document.getElementById(`zone${z}Bar`).style.background = colors[z];
+        document.getElementById(`zone${z}Status`).style.color = 'var(--accent-green)';
+        document.getElementById(`zone${z}Status`).textContent = '● Normal';
+      }
+    });
+  }
+
+  // ========== HISTORY ==========
+  function addHistory(zone, load, temp, time, predicted, status, action) {
+    const now = new Date();
+    const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+    const timeLabel = time === 0 ? '12AM' : time < 12 ? `${time}AM` : time === 12 ? '12PM' : `${time-12}PM`;
+    historyLog.unshift({ zone, load, temp, time: timeLabel, predicted: predicted.toFixed(1), status, action, ts, id: analysisCount });
+    if (historyLog.length > 15) historyLog.pop();
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const tbody = document.getElementById('historyBody');
+    if (historyLog.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:30px; color:var(--text-secondary); font-size:0.82rem;"><i class="fa fa-inbox" style="font-size:1.5rem; display:block; margin-bottom:8px; opacity:0.4;"></i>No analyses yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = historyLog.map((h, i) => `
+      <tr style="${i===0?'background:var(--bg-card-hover);':''}">
+        <td style="color:var(--text-secondary); font-weight:600;">${h.id}</td>
+        <td><span style="background:rgba(59,130,246,0.1); color:var(--accent-blue); padding:2px 8px; border-radius:6px; font-weight:700; font-size:0.78rem;">Zone ${h.zone}</span></td>
+        <td style="font-weight:600;">${h.load} MW</td>
+        <td style="color:var(--accent-orange);">${h.temp}°C</td>
+        <td>${h.time}</td>
+        <td style="color:var(--accent-cyan); font-weight:700;">${h.predicted} MW</td>
+        <td><span class="badge badge-${h.status.toLowerCase()}">${h.status}</span></td>
+        <td style="font-size:0.78rem; color:var(--text-secondary);">${h.action}</td>
+        <td style="font-size:0.75rem; color:var(--text-secondary); font-family:monospace;">${h.ts}</td>
+      </tr>
+    `).join('');
+  }
+
+  function clearHistory() {
+    if (historyLog.length === 0) return;
+    historyLog = [];
+    renderHistory();
+  }
+
+  // ========== ALERT ==========
+  function showAlert(zone, predicted) {
+    const msg = `Zone ${zone} predicted load: ${predicted.toFixed(1)} MW — exceeds threshold by ${(predicted-150).toFixed(1)} MW. Immediate load redistribution required to prevent grid failure.`;
+    document.getElementById('alertMsg').textContent = msg;
+    document.getElementById('alertOverlay').classList.add('show');
+  }
+
+  function closeAlert() {
+    document.getElementById('alertOverlay').classList.remove('show');
+  }
+
+  // Clicking outside modal closes it
+  document.getElementById('alertOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeAlert();
+  });
+
+  // ========== VALIDATION ==========
+  function showValidationError() {
+    const inputs = [
+      document.getElementById('loadInput'),
+      document.getElementById('tempInput')
+    ];
+    inputs.forEach(inp => {
+      if (isNaN(parseFloat(inp.value)) || inp.value === '') {
+        inp.style.borderColor = 'var(--accent-red)';
+        inp.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.2)';
+        setTimeout(() => {
+          inp.style.borderColor = '';
+          inp.style.boxShadow = '';
+        }, 2000);
+      }
+    });
+  }
+
+  // ========== KEYBOARD SHORTCUT ==========
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !document.getElementById('submitBtn').disabled) {
+      document.getElementById('submitBtn').click();
+    }
+    if (e.key === 'r' && e.ctrlKey) { e.preventDefault(); randomize(); }
+  });
+
+  // ========== INITIAL CHART DATA POINT ==========
+  chartLabels.push('Init');
+  chartCurrentData.push(0);
+  chartPredictedData.push(0);
+  chartInstance.update();
+
+</script>
+</body>
+</html>
