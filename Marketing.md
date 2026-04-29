@@ -4,10 +4,13 @@
 
 Your product can be targeted to:
 
+
 Commercial Buildings - 
 Offices, malls, hospitals, hotels
+
 Industrial Sector - 
 Factories with heavy machinery and high power usage
+
 Government & Smart City Projects - 
 Energy-efficient infrastructure initiatives
 
@@ -16,14 +19,20 @@ Energy-efficient infrastructure initiatives
 This system solves real problems:
 
 High electricity bills
+
 Power overload and outages
+
 Manual monitoring difficulties
+
 Inefficient energy usage
+
 
 Customers are looking for:
 
 Cost savings
+
 Automation
+
 Reliability
 Remote control and monitoring
 
