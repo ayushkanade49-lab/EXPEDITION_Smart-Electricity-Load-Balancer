@@ -28,6 +28,14 @@ The main processing pipeline is functioning, and the interface is becoming more 
 *Next steps:* Add more real-time feedback for better user experience.
 Test the system across multiple scenarios to ensure stability and accuracy.
 
+## Checkpoint 5 – Stability & Debugging (06:00 AM)
+
+*Tasks completed:* Performed extensive debugging of the system to identify and fix issues in the load-processing logic and user interface.
+
+*Current progress:* The system is now more stable and reliable, with consistent performance during multiple test runs. Minor bugs have been resolved
+
+*Next steps:* Prepare final demo, polish UI, and ensure seamless end-to-end execution for presentation.
+
 # Progress Tracking - TEAM EXPEDITION
 
 **Checkpoint 1: Initial setup & idea validation (03:00 PM)**
@@ -55,3 +63,9 @@ Smart Suggestions:
 - [x] Ensure correct mapping of input to output
 - [x] Optimize logic flow and real time feedback
 - [x] Enhance UI design and readability
+
+**Checkpoint 5: Stability and debugging (06:00 PM)**
+- [x] consistent performance during multiple test runs
+- [x] application responds accurately
+- [x] The system is now more stable and reliable
+- [x] Debugging is done
